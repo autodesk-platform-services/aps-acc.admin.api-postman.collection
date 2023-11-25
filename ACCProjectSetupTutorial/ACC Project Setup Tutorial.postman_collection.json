@@ -1,0 +1,1805 @@
+{
+	"info": {
+		"_postman_id": "8159e363-09f7-4c92-90eb-34ef28aa0d51",
+		"name": "ACC Project Setup Tutorial",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "942004"
+	},
+	"item": [
+		{
+			"name": "2 Legged Token Tutorial",
+			"item": [
+				{
+					"name": "Prep Step 0: Reset the environment variables",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.environment.clear();",
+									"",
+									"// Please change the following variables according to your account setting",
+									"// your APS App key",
+									"pm.environment.set(\"client_id\",     \"your APS client id\");",
+									"pm.environment.set(\"client_secret\", \"your APS client secret\");",
+									"",
+									"// // Change to the specified project name",
+									"pm.environment.set(\"account_name\",          \"your ACC Account Name\");",
+									"pm.environment.set(\"template_project_name\", \"your ACC template project name\");",
+									"pm.environment.set(\"new_project_name\",      \"your new project name\");",
+									"",
+									"",
+									"// Email of Account Admin or Project Admin(if allowed to create projects)",
+									"pm.environment.set(\"admin_email\", \"admin@company.com\");",
+									"pm.environment.set(\"base_domain\", \"https://developer.api.autodesk.com/\");",
+									"",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });",
+									"",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "VIEW",
+						"header": [],
+						"url": {
+							"raw": "{{base_domain}}/health",
+							"host": [
+								"{{base_domain}}"
+							],
+							"path": [
+								"health"
+							]
+						},
+						"description": "Reset the following environment variables:\n1. Forge Client Key, please change to your Forge Client Id and Secret.\n2. Project name, please change to the correct project name which you want to work with.\n3. Base domain, should be https://developer.api.autodesk.com/ by default.\n4. Segment index, will be used to create multiple budget segments, should be 1 by default."
+					},
+					"response": []
+				},
+				{
+					"name": "Step 1: Get 2 legged access token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"var data = JSON.parse(responseBody);",
+									"postman.setEnvironmentVariable(\"access_token\", data.access_token);",
+									"postman.setEnvironmentVariable(\"expires_in\", data.expires_in);",
+									"postman.setEnvironmentVariable(\"token_type\", data.token_type);",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const clientId =  pm.environment.get(\"client_id\");",
+									"const clientSecret =  pm.environment.get(\"client_secret\");",
+									"",
+									"var token =  btoa(clientId +\":\"+clientSecret);",
+									"",
+									"postman.setEnvironmentVariable(\"token\", token);",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/x-www-form-urlencoded",
+								"type": "default"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "default"
+							},
+							{
+								"key": "Authorization",
+								"value": "Basic {{token}}",
+								"type": "default"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "grant_type",
+									"value": "client_credentials",
+									"type": "text"
+								},
+								{
+									"key": "scope",
+									"value": "account:read account:write data:read data:write",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_domain}}/authentication/v2/token",
+							"host": [
+								"{{base_domain}}"
+							],
+							"path": [
+								"authentication",
+								"v2",
+								"token"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Step 2: Get ACC Account",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"// setup the environment variable \"account_id\" with the 1st ACC hub",
+									"var responseBody = JSON.parse(responseBody);",
+									"var bim_hub = responseBody.data.find( hub =>  hub.id.indexOf(\"b.\") !== -1);",
+									"if(bim_hub !== null ){",
+									"        pm.environment.set(\"account_id\", bim_hub.id.split('b.').join(''));",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "default"
+							},
+							{
+								"key": "Region",
+								"value": "EMEA",
+								"type": "default",
+								"disabled": true
+							}
+						],
+						"url": {
+							"raw": "{{base_domain}}/project/v1/hubs?filter[name]={{account_name}}",
+							"host": [
+								"{{base_domain}}"
+							],
+							"path": [
+								"project",
+								"v1",
+								"hubs"
+							],
+							"query": [
+								{
+									"key": "filter[name]",
+									"value": "{{account_name}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Step 3: Find Account Admin Id by Email",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"var data = JSON.parse(responseBody);",
+									"postman.setEnvironmentVariable(\"admin_id\", data[0].id);",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "default"
+							}
+						],
+						"url": {
+							"raw": "{{base_domain}}hq/v1/accounts/{{account_id}}/users/search?email={{admin_email}}",
+							"host": [
+								"{{base_domain}}hq"
+							],
+							"path": [
+								"v1",
+								"accounts",
+								"{{account_id}}",
+								"users",
+								"search"
+							],
+							"query": [
+								{
+									"key": "email",
+									"value": "{{admin_email}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Step 4: Find the template project",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"var responseBody = JSON.parse(responseBody);",
+									"postman.setEnvironmentVariable(\"template_project_id\", responseBody.results[0].id);"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_domain}}construction/admin/v1/accounts/:account_id/projects?filter[name]={{template_project_name}}&filter[status]=active&filter[classification]=template&filter[type]=Template Project",
+							"host": [
+								"{{base_domain}}construction"
+							],
+							"path": [
+								"admin",
+								"v1",
+								"accounts",
+								":account_id",
+								"projects"
+							],
+							"query": [
+								{
+									"key": "filter[name]",
+									"value": "{{template_project_name}}"
+								},
+								{
+									"key": "filter[status]",
+									"value": "active"
+								},
+								{
+									"key": "filter[classification]",
+									"value": "template"
+								},
+								{
+									"key": "filter[type]",
+									"value": "Template Project"
+								}
+							],
+							"variable": [
+								{
+									"key": "account_id",
+									"value": "{{account_id}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Step 5: Create a Production Project from template",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 202\", function () {",
+									"    pm.response.to.have.status(202);",
+									"});",
+									"",
+									"var responseBody = JSON.parse(responseBody);",
+									"postman.setEnvironmentVariable(\"project_id\", responseBody.id);",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "User-Id",
+								"value": "{{admin_id}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"{{new_project_name}}\",\n    \"startDate\": \"2010-01-01\",\n    \"type\": \"School\",\n    \"endDate\": \"2015-12-31\",\n    \"projectValue\": {\n        \"value\": 1650000,\n        \"currency\": \"USD\"\n    },\n    \"jobNumber\": \"HP-0002\",\n    \"addressLine1\": \"123 Main Street\",\n    \"addressLine2\": \"Suite 2\",\n    \"city\": \"San Francisco\",\n    \"stateOrProvince\": \"California\",\n    \"postalCode\": \"94001\",\n    \"country\": \"United States\",\n    \"timezone\": \"America/Los_Angeles\",\n    \"constructionType\": \"New Construction\",\n    \"deliveryMethod\": \"Unit Price\",\n    \"currentPhase\": \"Design\",\n    \"template\": {\n        \"projectId\": \"{{template_project_id}}\"\n    }\n}"
+						},
+						"url": {
+							"raw": "{{base_domain}}construction/admin/v1/accounts/:account_id/projects",
+							"host": [
+								"{{base_domain}}construction"
+							],
+							"path": [
+								"admin",
+								"v1",
+								"accounts",
+								":account_id",
+								"projects"
+							],
+							"variable": [
+								{
+									"key": "account_id",
+									"value": "{{account_id}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Step 6: Add Project Admin to Trigger Copy Template Members Process (if applicable)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "User-Id",
+								"value": "{{admin_id}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"{{admin_email}}\",\n    \"products\": [\n        {\n            \"key\": \"projectAdministration\",\n            \"access\": \"administrator\"\n        },\n        {\n            \"key\": \"docs\",\n            \"access\": \"administrator\"\n        }\n    ]\n}"
+						},
+						"url": {
+							"raw": "{{base_domain}}construction/admin/v1/projects/:project_id/users",
+							"host": [
+								"{{base_domain}}construction"
+							],
+							"path": [
+								"admin",
+								"v1",
+								"projects",
+								":project_id",
+								"users"
+							],
+							"variable": [
+								{
+									"key": "project_id",
+									"value": "{{project_id}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Step 6:  Check the Project Status by Polling",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							},
+							{
+								"key": "Accept-Language",
+								"value": "fr-CH, fr;q=0.9, en;q=0.2, de;q=0.7, *;q=0.5",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_domain}}construction/admin/v1/projects/:project_id",
+							"host": [
+								"{{base_domain}}construction"
+							],
+							"path": [
+								"admin",
+								"v1",
+								"projects",
+								":project_id"
+							],
+							"variable": [
+								{
+									"key": "project_id",
+									"value": "{{project_id}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Step 7: Assign Multiple Users to the Project",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 202\", function () {",
+									"    pm.response.to.have.status(202);",
+									"});",
+									"",
+									"var responseBody = JSON.parse(responseBody);",
+									"// job_id is not supported currently",
+									"postman.setEnvironmentVariable(\"job_id\", responseBody.jobId);",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "User-Id",
+								"value": "{{admin_id}}",
+								"description": "User Zhong",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"users\": [\n        {\n            \"email\": \"{{admin_email}}\",\n            \"products\": [\n                {\n                    \"key\": \"projectAdministration\",\n                    \"access\": \"administrator\"\n                },\n                {\n                    \"key\": \"insight\",\n                    \"access\": \"administrator\"\n                },\n                {\n                    \"key\": \"docs\",\n                    \"access\": \"administrator\"\n                },\n                {\n                    \"key\": \"takeoff\",\n                    \"access\": \"administrator\"\n                },\n                {\n                    \"key\": \"designCollaboration\",\n                    \"access\": \"none\"\n                },\n                {\n                    \"key\": \"modelCoordination\",\n                    \"access\": \"none\"\n                },\n                {\n                    \"key\": \"build\",\n                    \"access\": \"none\"\n                },\n                {\n                    \"key\": \"cost\",\n                    \"access\": \"none\"\n                }\n            ]\n        }\n    ]\n}"
+						},
+						"url": {
+							"raw": "{{base_domain}}construction/admin/v2/projects/:project_id/users:import",
+							"host": [
+								"{{base_domain}}construction"
+							],
+							"path": [
+								"admin",
+								"v2",
+								"projects",
+								":project_id",
+								"users:import"
+							],
+							"variable": [
+								{
+									"key": "project_id",
+									"value": "{{project_id}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Step 8: Confirm That Each User Was Added to the Project",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"var responseBody = JSON.parse(responseBody);",
+									"// get the 1st user for simple test",
+									"postman.setEnvironmentVariable(\"user_id\", responseBody.results[0].id);",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "default"
+							}
+						],
+						"url": {
+							"raw": "{{base_domain}}construction/admin/v1/projects/:project_id/users",
+							"host": [
+								"{{base_domain}}construction"
+							],
+							"path": [
+								"admin",
+								"v1",
+								"projects",
+								":project_id",
+								"users"
+							],
+							"variable": [
+								{
+									"key": "project_id",
+									"value": "{{project_id}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Step 9: Configure Project Member Access to Products",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "User-Id",
+								"value": "{{admin_id}}",
+								"description": "Id of Zhong Wu",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "        {\n            \"products\": [\n                {\n                    \"key\": \"projectAdministration\",\n                    \"access\": \"administrator\"\n                },\n                {\n                    \"key\": \"insight\",\n                    \"access\": \"administrator\"\n                },\n                {\n                    \"key\": \"docs\",\n                    \"access\": \"administrator\"\n                },\n                {\n                    \"key\": \"takeoff\",\n                    \"access\": \"administrator\"\n                },\n                {\n                    \"key\": \"designCollaboration\",\n                    \"access\": \"administrator\"\n                },\n                {\n                    \"key\": \"modelCoordination\",\n                    \"access\": \"administrator\"\n                },\n                {\n                    \"key\": \"build\",\n                    \"access\": \"administrator\"\n                },     \n                {\n                    \"key\": \"autoSpecs\",\n                    \"access\": \"administrator\"\n                },\n                {\n                    \"key\": \"cost\",\n                    \"access\": \"none\"\n                },\n                {\n                    \"key\": \"financials\",\n                    \"access\": \"none\"\n                },\n                {\n                    \"key\": \"capitalPlanning\",\n                    \"access\": \"none\"\n                },\n                {\n                    \"key\": \"buildingConnected\",\n                    \"access\": \"none\"\n                }\n            ]\n        }"
+						},
+						"url": {
+							"raw": "{{base_domain}}construction/admin/v1/projects/:project_id/users/:user_id",
+							"host": [
+								"{{base_domain}}construction"
+							],
+							"path": [
+								"admin",
+								"v1",
+								"projects",
+								":project_id",
+								"users",
+								":user_id"
+							],
+							"variable": [
+								{
+									"key": "project_id",
+									"value": "{{project_id}}"
+								},
+								{
+									"key": "user_id",
+									"value": "{{user_id}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Step 10: Check the Project Member Status",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_domain}}construction/admin/v1/projects/:project_id/users/:user_id",
+							"host": [
+								"{{base_domain}}construction"
+							],
+							"path": [
+								"admin",
+								"v1",
+								"projects",
+								":project_id",
+								"users",
+								":user_id"
+							],
+							"query": [
+								{
+									"key": "",
+									"value": "0",
+									"disabled": true
+								}
+							],
+							"variable": [
+								{
+									"key": "project_id",
+									"value": "{{project_id}}"
+								},
+								{
+									"key": "user_id",
+									"value": "{{user_id}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Step 11: Remove a Project Member",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 204\", function () {",
+									"    pm.response.to.have.status(204);",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							},
+							{
+								"key": "User-Id",
+								"value": "{{admin_id}}",
+								"description": "Id of Zhong Wu",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_domain}}construction/admin/v1/projects/:project_id/users/:user_id",
+							"host": [
+								"{{base_domain}}construction"
+							],
+							"path": [
+								"admin",
+								"v1",
+								"projects",
+								":project_id",
+								"users",
+								":user_id"
+							],
+							"variable": [
+								{
+									"key": "project_id",
+									"value": "{{project_id}}"
+								},
+								{
+									"key": "user_id",
+									"value": "{{user_id}}"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "3 Legged Token Tutorial",
+			"item": [
+				{
+					"name": "Prep Step 0: Reset the environment variables",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.environment.clear();",
+									"",
+									"// Please change the following variables according to your account setting",
+									"// your APS App key",
+									"pm.environment.set(\"client_id\",     \"your APS client id\");",
+									"pm.environment.set(\"client_secret\", \"your APS client secret\");",
+									"",
+									"// // Change to the specified project name",
+									"pm.environment.set(\"account_name\",          \"your ACC Account Name\");",
+									"pm.environment.set(\"template_project_name\", \"your ACC template project name\");",
+									"pm.environment.set(\"new_project_name\",      \"your new project name\");",
+									"",
+									"pm.environment.set(\"base_domain\", \"https://developer.api.autodesk.com/\");",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });",
+									"",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "VIEW",
+						"header": [],
+						"url": {
+							"raw": "{{base_domain}}/health",
+							"host": [
+								"{{base_domain}}"
+							],
+							"path": [
+								"health"
+							]
+						},
+						"description": "Reset the following environment variables:\n1. Forge Client Key, please change to your Forge Client Id and Secret.\n2. Project name, please change to the correct project name which you want to work with.\n3. Base domain, should be https://developer.api.autodesk.com/ by default.\n4. Segment index, will be used to create multiple budget segments, should be 1 by default."
+					},
+					"response": []
+				},
+				{
+					"name": "Step 1: Get 3 legged access token(please setup 3 Legged Token in parent folder)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var data = JSON.parse(responseBody);",
+									"postman.setEnvironmentVariable(\"access_token\", data.access_token);",
+									"postman.setEnvironmentVariable(\"expires_in\", data.expires_in);",
+									"postman.setEnvironmentVariable(\"token_type\", data.token_type);",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const clientId =  pm.environment.get(\"client_id\");",
+									"const clientSecret =  pm.environment.get(\"client_secret\");",
+									"",
+									"var token =  btoa(clientId +\":\"+clientSecret);",
+									"",
+									"postman.setEnvironmentVariable(\"token\", token);",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "VIEW",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/x-www-form-urlencoded",
+								"type": "default"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "default"
+							},
+							{
+								"key": "Authorization",
+								"value": "Basic {{token}}",
+								"type": "default"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "grant_type",
+									"value": "client_credentials",
+									"type": "text"
+								},
+								{
+									"key": "scope",
+									"value": "account:read account:write data:read data:write",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "Just a place holder",
+							"host": [
+								"Just a place holder"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Step 2: Get ACC Account",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"// setup the environment variable \"account_id\" with the 1st ACC account",
+									"var responseBody = JSON.parse(responseBody);",
+									"var bim_hub = responseBody.data.find( hub =>  hub.id.indexOf(\"b.\") !== -1);",
+									"if(bim_hub !== null ){    ",
+									"    pm.environment.set(\"account_id\", bim_hub.id.split('b.').join(''));",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_domain}}/project/v1/hubs?filter[name]={{account_name}}",
+							"host": [
+								"{{base_domain}}"
+							],
+							"path": [
+								"project",
+								"v1",
+								"hubs"
+							],
+							"query": [
+								{
+									"key": "filter[name]",
+									"value": "{{account_name}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Step 3: Retrieve the Account Admin  Id",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () { ",
+									"    pm.response.to.have.status(200); ",
+									"});",
+									"",
+									"var responseBody = JSON.parse(responseBody);",
+									"postman.setEnvironmentVariable(\"admin_id\", responseBody.sub);",
+									"postman.setEnvironmentVariable(\"admin_email\", responseBody.email);",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://api.userprofile.autodesk.com/userinfo",
+							"protocol": "https",
+							"host": [
+								"api",
+								"userprofile",
+								"autodesk",
+								"com"
+							],
+							"path": [
+								"userinfo"
+							]
+						},
+						"description": "Get the specified industry role from this project, and set to \"industry_role\"."
+					},
+					"response": []
+				},
+				{
+					"name": "Step 4: Find the template project",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () { ",
+									"    pm.response.to.have.status(200);",
+									" });",
+									"",
+									"var responseBody = JSON.parse(responseBody);",
+									"postman.setEnvironmentVariable(\"template_project_id\", responseBody.results[0].id);"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_domain}}construction/admin/v1/accounts/:account_id/projects?filter[name]={{template_project_name}}&filter[status]=active&filter[classification]=template&filter[type]=Template Project",
+							"host": [
+								"{{base_domain}}construction"
+							],
+							"path": [
+								"admin",
+								"v1",
+								"accounts",
+								":account_id",
+								"projects"
+							],
+							"query": [
+								{
+									"key": "filter[name]",
+									"value": "{{template_project_name}}"
+								},
+								{
+									"key": "filter[status]",
+									"value": "active"
+								},
+								{
+									"key": "filter[classification]",
+									"value": "template"
+								},
+								{
+									"key": "filter[type]",
+									"value": "Template Project"
+								}
+							],
+							"variable": [
+								{
+									"key": "account_id",
+									"value": "{{account_id}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Step 5: Create a Production Project from template",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 202\", function () { ",
+									"    pm.response.to.have.status(202); ",
+									"});",
+									"",
+									"var responseBody = JSON.parse(responseBody);",
+									"postman.setEnvironmentVariable(\"project_id\", responseBody.id);",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"{{new_project_name}}\",\n    \"startDate\": \"2010-01-01\",\n    \"classification\": \"production\",\n    \"type\": \"Commercial\",\n    \"endDate\": \"2015-12-31\",\n    \"projectValue\": {\n        \"value\": 1650000,\n        \"currency\": \"USD\"\n    },\n    \"jobNumber\": \"HP-0002\",\n    \"addressLine1\": \"123 Main Street\",\n    \"addressLine2\": \"Suite 2\",\n    \"city\": \"San Francisco\",\n    \"stateOrProvince\": \"California\",\n    \"postalCode\": \"94001\",\n    \"country\": \"United States\",\n    \"timezone\": \"America/Los_Angeles\",\n    \"constructionType\": \"New Construction\",\n    \"deliveryMethod\": \"Unit Price\",\n    \"currentPhase\": \"Design\",\n    \"template\": {\n        \"projectId\": \"{{template_project_id}}\"\n    }\n}"
+						},
+						"url": {
+							"raw": "{{base_domain}}construction/admin/v1/accounts/:account_id/projects",
+							"host": [
+								"{{base_domain}}construction"
+							],
+							"path": [
+								"admin",
+								"v1",
+								"accounts",
+								":account_id",
+								"projects"
+							],
+							"variable": [
+								{
+									"key": "account_id",
+									"value": "{{account_id}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Step 6: Add Project Admin to Trigger Copy Template Members Process (if applicable)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201\", function () { ",
+									"    pm.response.to.have.status(201); ",
+									"});",
+									"",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"{{admin_email}}\",\n    \"products\": [\n        {\n            \"key\": \"projectAdministration\",\n            \"access\": \"administrator\"\n        },\n        {\n            \"key\": \"insight\",\n            \"access\": \"administrator\"\n        },\n        {\n            \"key\": \"docs\",\n            \"access\": \"administrator\"\n        },\n        {\n            \"key\": \"takeoff\",\n            \"access\": \"none\"\n        },\n        {\n            \"key\": \"designCollaboration\",\n            \"access\": \"none\"\n        },\n        {\n            \"key\": \"modelCoordination\",\n            \"access\": \"none\"\n        },\n        {\n            \"key\": \"build\",\n            \"access\": \"none\"\n        },\n        {\n            \"key\": \"cost\",\n            \"access\": \"none\"\n        }\n    ]\n}"
+						},
+						"url": {
+							"raw": "{{base_domain}}construction/admin/v1/projects/:project_id/users",
+							"host": [
+								"{{base_domain}}construction"
+							],
+							"path": [
+								"admin",
+								"v1",
+								"projects",
+								":project_id",
+								"users"
+							],
+							"variable": [
+								{
+									"key": "project_id",
+									"value": "{{project_id}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Step 6:  Check the Project Status by Polling",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () { ",
+									"    pm.response.to.have.status(200); ",
+									"});",
+									"",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_domain}}construction/admin/v1/projects/:project_id",
+							"host": [
+								"{{base_domain}}construction"
+							],
+							"path": [
+								"admin",
+								"v1",
+								"projects",
+								":project_id"
+							],
+							"variable": [
+								{
+									"key": "project_id",
+									"value": "{{project_id}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Step 7: Assign Multiple Users to the Project",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 202\", function () { pm.response.to.have.status(202); });",
+									"",
+									"var responseBody = JSON.parse(responseBody);",
+									"",
+									"// job_id is not supported currently",
+									"postman.setEnvironmentVariable(\"job_id\", responseBody.jobId);",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"users\": [\n        {\n            \"email\": \"{{admin_email}}\",\n            \"products\": [\n                {\n                    \"key\": \"projectAdministration\",\n                    \"access\": \"administrator\"\n                },\n                {\n                    \"key\": \"insight\",\n                    \"access\": \"administrator\"\n                },\n                {\n                    \"key\": \"docs\",\n                    \"access\": \"administrator\"\n                },\n                {\n                    \"key\": \"takeoff\",\n                    \"access\": \"administrator\"\n                },\n                {\n                    \"key\": \"designCollaboration\",\n                    \"access\": \"none\"\n                },\n                {\n                    \"key\": \"modelCoordination\",\n                    \"access\": \"none\"\n                },\n                {\n                    \"key\": \"build\",\n                    \"access\": \"none\"\n                },\n                {\n                    \"key\": \"cost\",\n                    \"access\": \"none\"\n                }\n            ]\n        }\n    ]\n}"
+						},
+						"url": {
+							"raw": "{{base_domain}}construction/admin/v2/projects/:project_id/users:import",
+							"host": [
+								"{{base_domain}}construction"
+							],
+							"path": [
+								"admin",
+								"v2",
+								"projects",
+								":project_id",
+								"users:import"
+							],
+							"variable": [
+								{
+									"key": "project_id",
+									"value": "{{project_id}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Step 8: Confirm That Each User Was Added to the Project",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () { ",
+									"    pm.response.to.have.status(200); ",
+									"});",
+									"",
+									"var responseBody = JSON.parse(responseBody);",
+									"// get the 1st user for simple test",
+									"postman.setEnvironmentVariable(\"user_id\", responseBody.results[0].id);",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_domain}}construction/admin/v1/projects/:project_id/users",
+							"host": [
+								"{{base_domain}}construction"
+							],
+							"path": [
+								"admin",
+								"v1",
+								"projects",
+								":project_id",
+								"users"
+							],
+							"variable": [
+								{
+									"key": "project_id",
+									"value": "{{project_id}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Step 9: Configure Project Member Access to Products",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () { ",
+									"    pm.response.to.have.status(200); ",
+									"});",
+									"",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "        {\n            \"products\": [\n                {\n                    \"key\": \"projectAdministration\",\n                    \"access\": \"administrator\"\n                },\n                {\n                    \"key\": \"insight\",\n                    \"access\": \"administrator\"\n                },\n                {\n                    \"key\": \"docs\",\n                    \"access\": \"administrator\"\n                },\n                {\n                    \"key\": \"takeoff\",\n                    \"access\": \"administrator\"\n                },\n                {\n                    \"key\": \"designCollaboration\",\n                    \"access\": \"administrator\"\n                },\n                {\n                    \"key\": \"modelCoordination\",\n                    \"access\": \"administrator\"\n                },\n                {\n                    \"key\": \"build\",\n                    \"access\": \"administrator\"\n                },     \n                {\n                    \"key\": \"autoSpecs\",\n                    \"access\": \"administrator\"\n                },\n                {\n                    \"key\": \"cost\",\n                    \"access\": \"none\"\n                },\n                {\n                    \"key\": \"financials\",\n                    \"access\": \"none\"\n                },\n                {\n                    \"key\": \"capitalPlanning\",\n                    \"access\": \"none\"\n                },\n                {\n                    \"key\": \"buildingConnected\",\n                    \"access\": \"none\"\n                }\n            ]\n        }"
+						},
+						"url": {
+							"raw": "{{base_domain}}construction/admin/v1/projects/:project_id/users/:user_id",
+							"host": [
+								"{{base_domain}}construction"
+							],
+							"path": [
+								"admin",
+								"v1",
+								"projects",
+								":project_id",
+								"users",
+								":user_id"
+							],
+							"variable": [
+								{
+									"key": "project_id",
+									"value": "{{project_id}}"
+								},
+								{
+									"key": "user_id",
+									"value": "{{user_id}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Step 10: Check the Project Member Status",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () { ",
+									"    pm.response.to.have.status(200); ",
+									"});",
+									"",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_domain}}construction/admin/v1/projects/:project_id/users/:user_id",
+							"host": [
+								"{{base_domain}}construction"
+							],
+							"path": [
+								"admin",
+								"v1",
+								"projects",
+								":project_id",
+								"users",
+								":user_id"
+							],
+							"query": [
+								{
+									"key": "",
+									"value": "0",
+									"disabled": true
+								}
+							],
+							"variable": [
+								{
+									"key": "project_id",
+									"value": "{{project_id}}"
+								},
+								{
+									"key": "user_id",
+									"value": "{{user_id}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Step 11: Remove a Project Member",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () { ",
+									"    pm.response.to.have.status(200); ",
+									"});",
+									"",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_domain}}construction/admin/v1/projects/:project_id/users/:user_id",
+							"host": [
+								"{{base_domain}}construction"
+							],
+							"path": [
+								"admin",
+								"v1",
+								"projects",
+								":project_id",
+								"users",
+								":user_id"
+							],
+							"variable": [
+								{
+									"key": "project_id",
+									"value": "{{project_id}}"
+								},
+								{
+									"key": "user_id",
+									"value": "{{user_id}}"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"auth": {
+				"type": "oauth2",
+				"oauth2": [
+					{
+						"key": "client_authentication",
+						"value": "header",
+						"type": "string"
+					},
+					{
+						"key": "scope",
+						"value": "data:read data:create data:write data:search account:read account:write",
+						"type": "string"
+					},
+					{
+						"key": "accessTokenUrl",
+						"value": "https://developer.api.autodesk.com/authentication/v2/token",
+						"type": "string"
+					},
+					{
+						"key": "authUrl",
+						"value": "https://developer.api.autodesk.com/authentication/v2/authorize",
+						"type": "string"
+					},
+					{
+						"key": "redirect_uri",
+						"value": "https://www.getpostman.com/oauth2/callback",
+						"type": "string"
+					},
+					{
+						"key": "grant_type",
+						"value": "authorization_code",
+						"type": "string"
+					},
+					{
+						"key": "tokenName",
+						"value": "3 Legged Token of Account Admin or Project Admin",
+						"type": "string"
+					},
+					{
+						"key": "refreshRequestParams",
+						"value": [],
+						"type": "any"
+					},
+					{
+						"key": "tokenRequestParams",
+						"value": [],
+						"type": "any"
+					},
+					{
+						"key": "authRequestParams",
+						"value": [],
+						"type": "any"
+					},
+					{
+						"key": "challengeAlgorithm",
+						"value": "S256",
+						"type": "string"
+					},
+					{
+						"key": "clientSecret",
+						"value": "{{client_secret}}",
+						"type": "string"
+					},
+					{
+						"key": "clientId",
+						"value": "{{client_id}}",
+						"type": "string"
+					},
+					{
+						"key": "addTokenTo",
+						"value": "header",
+						"type": "string"
+					}
+				]
+			},
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	]
+}
