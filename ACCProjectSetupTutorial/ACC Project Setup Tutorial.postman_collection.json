@@ -67,7 +67,7 @@
 					"response": []
 				},
 				{
-					"name": "Step 1: Get 2 legged access token",
+					"name": "Prep Step 1: Get 2 legged access token",
 					"event": [
 						{
 							"listen": "test",
@@ -154,7 +154,7 @@
 					"response": []
 				},
 				{
-					"name": "Step 2: Get ACC Account",
+					"name": "Prep Step 2: Get ACC Account",
 					"event": [
 						{
 							"listen": "test",
@@ -214,7 +214,7 @@
 					"response": []
 				},
 				{
-					"name": "Step 3: Find Account Admin Id by Email",
+					"name": "Prep Step 3: Find Account Admin Id by Email",
 					"event": [
 						{
 							"listen": "test",
@@ -267,7 +267,7 @@
 					"response": []
 				},
 				{
-					"name": "Step 4: Find the template project",
+					"name": "Prep Step 4: Find the template project",
 					"event": [
 						{
 							"listen": "test",
@@ -345,7 +345,7 @@
 					"response": []
 				},
 				{
-					"name": "Step 5: Create a Production Project from template",
+					"name": "Step 1: Create a Production Project from template",
 					"event": [
 						{
 							"listen": "test",
@@ -420,7 +420,68 @@
 					"response": []
 				},
 				{
-					"name": "Step 6: Add Project Admin to Trigger Copy Template Members Process (if applicable)",
+					"name": "Step 2:  Check the Project Status by Polling",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							},
+							{
+								"key": "Accept-Language",
+								"value": "fr-CH, fr;q=0.9, en;q=0.2, de;q=0.7, *;q=0.5",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_domain}}construction/admin/v1/projects/:project_id",
+							"host": [
+								"{{base_domain}}construction"
+							],
+							"path": [
+								"admin",
+								"v1",
+								"projects",
+								":project_id"
+							],
+							"variable": [
+								{
+									"key": "project_id",
+									"value": "{{project_id}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Step 3A: Add Project Admin to Trigger Copy Template Members Process (if applicable)",
 					"event": [
 						{
 							"listen": "test",
@@ -491,68 +552,7 @@
 					"response": []
 				},
 				{
-					"name": "Step 6:  Check the Project Status by Polling",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status code is 200\", function () {",
-									"    pm.response.to.have.status(200);",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						},
-						{
-							"listen": "prerequest",
-							"script": {
-								"exec": [
-									""
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"auth": {
-							"type": "noauth"
-						},
-						"method": "GET",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{access_token}}"
-							},
-							{
-								"key": "Accept-Language",
-								"value": "fr-CH, fr;q=0.9, en;q=0.2, de;q=0.7, *;q=0.5",
-								"type": "text"
-							}
-						],
-						"url": {
-							"raw": "{{base_domain}}construction/admin/v1/projects/:project_id",
-							"host": [
-								"{{base_domain}}construction"
-							],
-							"path": [
-								"admin",
-								"v1",
-								"projects",
-								":project_id"
-							],
-							"variable": [
-								{
-									"key": "project_id",
-									"value": "{{project_id}}"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Step 7: Assign Multiple Users to the Project",
+					"name": "Step 3B: Assign Multiple Users to the Project",
 					"event": [
 						{
 							"listen": "test",
@@ -629,7 +629,7 @@
 					"response": []
 				},
 				{
-					"name": "Step 8: Confirm That Each User Was Added to the Project",
+					"name": "Step 4: Confirm That Each User Was Added to the Project",
 					"event": [
 						{
 							"listen": "test",
@@ -692,7 +692,7 @@
 					"response": []
 				},
 				{
-					"name": "Step 9: Configure Project Member Access to Products",
+					"name": "Step 5: Configure Project Member Access to Products",
 					"event": [
 						{
 							"listen": "test",
@@ -770,7 +770,7 @@
 					"response": []
 				},
 				{
-					"name": "Step 10: Check the Project Member Status",
+					"name": "Step 6: Check the Project Member Status",
 					"event": [
 						{
 							"listen": "test",
@@ -840,7 +840,7 @@
 					"response": []
 				},
 				{
-					"name": "Step 11: Remove a Project Member",
+					"name": "Step 7: Remove a Project Member",
 					"event": [
 						{
 							"listen": "test",
@@ -967,7 +967,7 @@
 					"response": []
 				},
 				{
-					"name": "Step 1: Get 3 legged access token(please setup 3 Legged Token in parent folder)",
+					"name": "Prep Step 1: Get 3 legged access token(please setup 3 Legged Token in parent folder)",
 					"event": [
 						{
 							"listen": "test",
@@ -1045,7 +1045,7 @@
 					"response": []
 				},
 				{
-					"name": "Step 2: Get ACC Account",
+					"name": "Prep Step 2: Get ACC Account",
 					"event": [
 						{
 							"listen": "test",
@@ -1090,7 +1090,7 @@
 					"response": []
 				},
 				{
-					"name": "Step 3: Retrieve the Account Admin  Id",
+					"name": "Prep Step 3: Retrieve the Account Admin  Id",
 					"event": [
 						{
 							"listen": "test",
@@ -1139,7 +1139,7 @@
 					"response": []
 				},
 				{
-					"name": "Step 4: Find the template project",
+					"name": "Prep Step 4: Find the template project",
 					"event": [
 						{
 							"listen": "test",
@@ -1209,7 +1209,7 @@
 					"response": []
 				},
 				{
-					"name": "Step 5: Create a Production Project from template",
+					"name": "Step 1: Create a Production Project from template",
 					"event": [
 						{
 							"listen": "test",
@@ -1272,7 +1272,57 @@
 					"response": []
 				},
 				{
-					"name": "Step 6: Add Project Admin to Trigger Copy Template Members Process (if applicable)",
+					"name": "Step 2:  Check the Project Status by Polling",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () { ",
+									"    pm.response.to.have.status(200); ",
+									"});",
+									"",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_domain}}construction/admin/v1/projects/:project_id",
+							"host": [
+								"{{base_domain}}construction"
+							],
+							"path": [
+								"admin",
+								"v1",
+								"projects",
+								":project_id"
+							],
+							"variable": [
+								{
+									"key": "project_id",
+									"value": "{{project_id}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Step 3A: Add Project Admin to Trigger Copy Template Members Process (if applicable)",
 					"event": [
 						{
 							"listen": "test",
@@ -1333,57 +1383,7 @@
 					"response": []
 				},
 				{
-					"name": "Step 6:  Check the Project Status by Polling",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status code is 200\", function () { ",
-									"    pm.response.to.have.status(200); ",
-									"});",
-									"",
-									""
-								],
-								"type": "text/javascript"
-							}
-						},
-						{
-							"listen": "prerequest",
-							"script": {
-								"exec": [
-									""
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{base_domain}}construction/admin/v1/projects/:project_id",
-							"host": [
-								"{{base_domain}}construction"
-							],
-							"path": [
-								"admin",
-								"v1",
-								"projects",
-								":project_id"
-							],
-							"variable": [
-								{
-									"key": "project_id",
-									"value": "{{project_id}}"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Step 7: Assign Multiple Users to the Project",
+					"name": "Step 3B: Assign Multiple Users to the Project",
 					"event": [
 						{
 							"listen": "test",
@@ -1446,7 +1446,7 @@
 					"response": []
 				},
 				{
-					"name": "Step 8: Confirm That Each User Was Added to the Project",
+					"name": "Step 4: Confirm That Each User Was Added to the Project",
 					"event": [
 						{
 							"listen": "test",
@@ -1500,7 +1500,7 @@
 					"response": []
 				},
 				{
-					"name": "Step 9: Configure Project Member Access to Products",
+					"name": "Step 5: Configure Project Member Access to Products",
 					"event": [
 						{
 							"listen": "test",
@@ -1566,7 +1566,7 @@
 					"response": []
 				},
 				{
-					"name": "Step 10: Check the Project Member Status",
+					"name": "Step 6: Check the Project Member Status",
 					"event": [
 						{
 							"listen": "test",
@@ -1629,7 +1629,7 @@
 					"response": []
 				},
 				{
-					"name": "Step 11: Remove a Project Member",
+					"name": "Step 7: Remove a Project Member",
 					"event": [
 						{
 							"listen": "test",
@@ -1695,7 +1695,7 @@
 					},
 					{
 						"key": "scope",
-						"value": "data:read data:create data:write data:search account:read account:write",
+						"value": "data:read data:write account:read account:write",
 						"type": "string"
 					},
 					{

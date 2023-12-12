@@ -2,7 +2,7 @@
 
 This repository contains API collection as follow for different purpose which could help you understand the usage of ACC Admin API:
 
-- [ACC Project Setup Tutorial](ACCProjectSetupTutorial), includes a set of API working as tutorial of ACC Project Setup workflow.
+- [ACC Project Setup Tutorial](ACCProjectSetupTutorial), includes a set of API working as tutorial of ACC Project Setup workflow. The postman collection workflow mainly follow the [Step-by-Step Tutorials - Create and Configure Projects](https://aps.autodesk.com/en/docs/acc/v1/tutorials/admin/admin-create-configure-projects/#step-3-assign-members-to-your-project).
 
 
 ## What's Postman?

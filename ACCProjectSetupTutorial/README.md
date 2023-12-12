@@ -1,7 +1,7 @@
 # ACC Project Setup Step-by-Step Tutorial
 
 ![Platforms](https://img.shields.io/badge/Web-Windows|MacOS-lightgray.svg)
-[![oAuth2](https://img.shields.io/badge/Authentication-v1-green.svg)](http://developer.autodesk.com/)
+[![oAuth2](https://img.shields.io/badge/Authentication-v2-green.svg)](http://developer.autodesk.com/)
 [![Data-Management](https://img.shields.io/badge/Data%20Management-v2-green.svg)](http://developer.autodesk.com/)
 [![ACC-Admin](https://img.shields.io/badge/ACC%20Admin-V1-green.svg)](http://developer.autodesk.com/)
 
@@ -30,17 +30,17 @@ This folder contains a Postman Collection that contains the requests cover the c
     - new_project_name
     - admin_email
 
-- Step 1: Get 2 Legged Access Token.
-- Step 2: Get specified ACC Account Id.
-- Step 3: Get Admin Id by email.
-- Step 4: Get Project Template Id.
-- Step 5: Create a new ACC project from the template.
-- Step 6: Add a project admin from email, this will also trigger the coping process of template project members. 
-- Step 7: Assign multiple project users.
-- Step 8: Check if all the users are added successfully
-- Step 9: Update the product access level for the project user.
-- Step 10: Check if the project user is updated as expected.
-- Step 11: Remove the user from the project.
+- Prep Step 1: Get 2 Legged Access Token.
+- Prep Step 2: Get specified ACC Account Id.
+- Prep Step 3: Get Admin Id by email.
+- Prep Step 4: Get Project Template Id.
+- Step 1: Create a new ACC project from the template.
+- Step 2: Add a project admin from email, this will also trigger the coping process of template project members. 
+- Step 3: Assign multiple project users.
+- Step 4: Check if all the users are added successfully
+- Step 5: Update the product access level for the project user.
+- Step 6: Check if the project user is updated as expected.
+- Step 7: Remove the user from the project.
 
 ### 3 Legged Token Tutorial
 - Prep Step 0: Setup the environment variables, please specify your information as follow:
@@ -50,22 +50,22 @@ This folder contains a Postman Collection that contains the requests cover the c
     - template_project_name
     - new_project_name
 
-- Step 1: Please get the Authorization for the parent folder `3 Legged Token Tutorial`, right click **Edit**, go to **Authorization** tab, make sure to use **OAuth 2.0** to get a 3 legged token, use it in the **Request Headers**.
+- Prep Step 1: Please get the Authorization for the parent folder `3 Legged Token Tutorial`, right click **Edit**, go to **Authorization** tab, make sure to use **OAuth 2.0** to get a 3 legged token, use it in the **Request Headers**.
 ![3leggedToken](Img/3leggedToken.png)
     - Callback URL: https://www.getpostman.com/oauth2/callback
     - Auth URL: https://developer.api.autodesk.com/authentication/v2/authorize 
     - Access Token URL: https://developer.api.autodesk.com/authentication/v2/token
 
-- Step 2: Get specified ACC Account Id.
-- Step 3: Get Admin information of the current user, including Id and email.
-- Step 4: Get Project Template Id.
-- Step 5: Create a new ACC project from the template.
-- Step 6: Add a project admin from email, this will also trigger the coping process of template project members. 
-- Step 7: Assign multiple project users.
-- Step 8: Check if all the users are added successfully
-- Step 9: Update the product access level for the project user.
-- Step 10: Check if the project user is updated as expected.
-- Step 11: Remove the user from the project.
+- Prep Step 2: Get specified ACC Account Id.
+- Prep Step 3: Get Admin information of the current user, including Id and email.
+- Prep Step 4: Get Project Template Id.
+- Step 1: Create a new ACC project from the template.
+- Step 2: Add a project admin from email, this will also trigger the coping process of template project members. 
+- Step 3: Assign multiple project users.
+- Step 4: Check if all the users are added successfully
+- Step 5: Update the product access level for the project user.
+- Step 6: Check if the project user is updated as expected.
+- Step 7: Remove the user from the project.
 
 
 ## License
