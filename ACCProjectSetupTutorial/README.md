@@ -69,7 +69,8 @@ This folder contains a Postman Collection that contains the requests cover the c
 
 
 ## Live Demo
-<iframe width="560" height="315" src="https://www.youtube.com/embed/Aw99kOKFu7E?si=CfShqnXkrd6afpJn&amp;start=1346" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+[![https://youtu.be/Aw99kOKFu7E](http://img.youtube.com/vi/Aw99kOKFu7E/0.jpg)](https://youtu.be/Aw99kOKFu7E?si=7B4NOHZ24EfVFh3m&t=1322 "ACC Admin API Demo")
+
 
 
 ## License
