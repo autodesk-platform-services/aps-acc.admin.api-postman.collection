@@ -12,7 +12,7 @@
 
 This folder contains a Postman Collection that contains the requests cover the current main workflow of ACC Project Setup. Including both 2 Legged token workflow and 3 Legged token workflow. Either collection shows you how to create a project from template, add a project admin, assign multiple project users, update/delete the specified project user.
 
-![Collection](Img/collection.png)
+![Collection](resource/collection.png)
 
 
 ## Preparation before you begin:
@@ -51,7 +51,7 @@ This folder contains a Postman Collection that contains the requests cover the c
     - new_project_name
 
 - Prep Step 1: Please get the Authorization for the parent folder `3 Legged Token Tutorial`, right click **Edit**, go to **Authorization** tab, make sure to use **OAuth 2.0** to get a 3 legged token, use it in the **Request Headers**.
-![3leggedToken](Img/3leggedToken.png)
+![3leggedToken](resource/3leggedToken.png)
     - Callback URL: https://www.getpostman.com/oauth2/callback
     - Auth URL: https://developer.api.autodesk.com/authentication/v2/authorize 
     - Access Token URL: https://developer.api.autodesk.com/authentication/v2/token
