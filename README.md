@@ -8,11 +8,11 @@ This repository contains API collection as follow for different purpose which co
 
 
 ## ACC Admin API Webinar Recording
-- A [webinar recording](https://www.youtube.com/watch?v=Aw99kOKFu7E) focusing on the new ACC Project Admin APIs, including the demostration of the Postman collection usage at time 22:03. 
+- A [webinar recording](https://www.youtube.com/watch?v=Aw99kOKFu7E) focused on the new ACC Project Admin APIs, trying to help beginners to get rid of some frequently asked questions/issues/limitations, please do watch the recording if you just start to play with ACC Project Admin related API, this webinar recording also includes the demonstration of the Postman Collection workflow at time 22:03.
 
-- [![https://youtu.be/Aw99kOKFu7E](http://img.youtube.com/vi/Aw99kOKFu7E/0.jpg)](https://youtu.be/Aw99kOKFu7E?si=7B4NOHZ24EfVFh3m&t=1322 "ACC Admin API Demo")
+- [![https://youtu.be/Aw99kOKFu7E](http://img.youtube.com/vi/Aw99kOKFu7E/0.jpg)](https://youtu.be/Aw99kOKFu7E?si=7B4NOHZ24EfVFh3m&t=1322 "ACC Project Admin API Demo")
 
-- The presentation PDF file also can be referenced [HERE](/ACCProjectSetupTutorial/resource/ACC%20Project%20Admin%20API%20Updates%20-%20Dec%202023_1213.pdf).  
+- The ``ACC Project Admin API PDF`` file also can be referenced [HERE](/ACCProjectSetupTutorial/resource/ACC%20Project%20Admin%20API%20Updates%20-%20Dec%202023_1213.pdf).  
 
 
 ## What's Postman?
